@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 
-function TaskList({setView}) {
+function TaskList({setView, coins, setCoins}) {
   // initialization of variables
-  const [coins, setCoins] = useState(0);
   const [tasks, setTasks] = useState([]); // holds task objects {text: string, done: boolean, value: int}
   const [taskValue, setTaskValue] = useState(1);
   const [editMode, setEditMode] = useState(false);

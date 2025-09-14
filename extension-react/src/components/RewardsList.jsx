@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 
-function RewardsList({setView}) {
+function RewardsList({setView, coins, setCoins}) {
   // initialization of variables
-  const [coins, setCoins] = useState(0);
   const [rewards, setRewards] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [rewardName, setRewardName] = useState("");
