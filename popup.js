@@ -15,11 +15,22 @@ function renderTasks() {
     .forEach((task, index) => {
       //loops over each of the tasks in taskList and create a li element , and set its text and a linethrough if it is completed
       const li = document.createElement("li");
+
       if (editMode) {
         const input = document.createElement("input");
         input.type = "text";
         input.value = task.text;
         input.dataset.index = index;
+
+        const valueSelect = document.createElement("select");
+        valueSelect.dataset.index = index;
+        for (let i = 1; i <= 5; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = `${i} coin${i > 1 ? "s" : ""}`;
+          if (i === task.value) opt.selected = true;
+          valueSelect.appendChild(opt);
+        }
 
         // Delete button
         const deleteBtn = document.createElement("button");
@@ -35,9 +46,10 @@ function renderTasks() {
         });
 
         li.appendChild(input);
+        li.appendChild(valueSelect);
         li.appendChild(deleteBtn);
       } else {
-        li.textContent = task.text;
+        li.textContent = `${task.text} (+${task.value} coins)`;
         if (task.done) {
           tasks.splice(index, 1); // remove the completed task from the array
         }
@@ -52,7 +64,7 @@ function renderTasks() {
 function completeTask(index) {
   if (!tasks[index].done) {
     tasks[index].done = true;
-    coins++;
+    coins += tasks[index].value;
     tasks = tasks.filter((task) => !task.done); // remove completed tasks from the array
     saveData();
   }
@@ -72,10 +84,16 @@ function render() {
 // hook up functionality to add task button
 document.getElementById("add-task").addEventListener("click", () => {
   const input = document.getElementById("new-task");
+  const valueSelect = document.getElementById("task-value"); // get the selected input reward value for task
   if (input.value.trim()) {
     // validates and adds a new task to the tasks array
-    tasks.push({ text: input.value, done: false });
+    tasks.push({
+      text: input.value,
+      done: false,
+      value: parseInt(valueSelect.value) || 1,
+    });
     input.value = ""; // clear input field
+    valueSelect.value = "1"; // reset dropdown
     saveData();
   }
 });
