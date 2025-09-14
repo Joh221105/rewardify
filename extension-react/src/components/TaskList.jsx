@@ -108,7 +108,7 @@ function TaskList({setView, coins, setCoins}) {
 
   return (
     <div>
-      <h2>Coins: {coins}</h2>
+      <h2 className="text-red-500">Coins: {coins}</h2>
       <button onClick={() => setEditMode(!editMode)}>
         {editMode ? "Done" : "Edit Mode"}
       </button>
