@@ -9,40 +9,50 @@ function TaskList({setView, coins, setCoins}) {
  // render tasks in the list
   function renderTasks() {
     return tasks
-      .filter((task) => !task.done) // filter out completed tasks
-      .map((task, index) => {
-        //loops over each of the tasks in taskList and create a li element
-        return (
-          <li key={index}>
-            {editMode ? (
-              <>
-                <input
-                  type="text"
-                  value={task.text}
-                  onChange={(e) => updateTask(index, "text", e.target.value)}
-                />
-                <select
-                  value={task.value || 1}
-                  onChange={(e) =>
-                    updateTask(index, "value", parseInt(e.target.value))
-                  }
-                >
-                  {[1, 2, 3, 4, 5].map((val) => (
-                    <option key={val} value={val}>
-                      {val} coin{val > 1 ? "s" : ""}
-                    </option>
-                  ))}
-                </select>
-                <button onClick={() => deleteTask(index)}>Delete</button>
-              </>
-            ) : (
-              <span onClick={() => completeTask(index)}>
-                {task.text} (+ {task.value || 1})
-              </span>
-            )}
-          </li>
-        );
-      });
+      .filter((task) => !task.done)  // filter out completed tasks
+      .map((task, index) => (  //loops over each of the tasks in taskList and create a li element
+        <li
+          key={index}
+          className="flex items-center justify-between bg-white p-2 mb-2 rounded shadow-sm"
+        >
+          {editMode ? (
+            <div className="flex gap-2 w-full">
+              <input
+                type="text"
+                value={task.text}
+                onChange={(e) => updateTask(index, "text", e.target.value)}
+                className="flex-1 border rounded px-2 py-1"
+              />
+              <select
+                value={task.value || 1}
+                onChange={(e) =>
+                  updateTask(index, "value", parseInt(e.target.value))
+                }
+                className="border rounded px-2 py-1"
+              >
+                {[1, 2, 3, 4, 5].map((val) => (
+                  <option key={val} value={val}>
+                    {val} coin{val > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => deleteTask(index)}
+                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ) : (
+            <span
+              onClick={() => completeTask(index)}
+              className="cursor-pointer flex-1 hover:bg-green-500 hover:text-white p-2 rounded"
+            >
+              {task.text} (+{task.value || 1})
+            </span>
+          )}
+        </li>
+      ));
   }
 
   // marks task as completed, increases coins, saves data
@@ -107,27 +117,46 @@ function TaskList({setView, coins, setCoins}) {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-red-500">Coins: {coins}</h2>
-      <button onClick={() => setEditMode(!editMode)}>
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
+      <button
+        onClick={() => setEditMode(!editMode)}
+        className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+      >
         {editMode ? "Done" : "Edit Mode"}
       </button>
-      <ul>{renderTasks()}</ul>
-      <input type="text" id="new-task" placeholder="New task" />
-      <select
-        value={taskValue}
-        onChange={(e) => setTaskValue(parseInt(e.target.value))}
+      <ul className="mb-4">{renderTasks()}</ul>
+      <div className="flex gap-2 mb-4">
+        <input
+          type="text"
+          id="new-task"
+          placeholder="New task"
+          className="flex-1 border rounded px-2 py-1"
+        />
+        <select
+          value={taskValue}
+          onChange={(e) => setTaskValue(parseInt(e.target.value))}
+          className="border rounded px-2 py-1"
+        >
+          {[1, 2, 3, 4, 5].map((val) => (
+            <option key={val} value={val}>
+              {val} coin{val > 1 ? "s" : ""}
+            </option>
+          ))}
+        </select>
+        <button
+          id="add-task"
+          onClick={addTask}
+          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+        >
+          Add
+        </button>
+      </div>
+      <button
+        id="open-rewards"
+        onClick={() => setView("rewards")}
+        className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600"
       >
-        {[1, 2, 3, 4, 5].map((val) => (
-          <option key={val} value={val}>
-            {val} coin{val > 1 ? "s" : ""}
-          </option>
-        ))}
-      </select>
-      <button id="add-task" onClick={addTask}>
-        Add Task
-      </button>
-      <button id="open-rewards" onClick={openRewards}>
         Rewards
       </button>
     </div>
