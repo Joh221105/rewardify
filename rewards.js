@@ -17,21 +17,23 @@ function renderRewards() {
     const redeemBtn = document.createElement("button");
     redeemBtn.textContent = "Redeem";
 
-    // reedeem click handler
+    // gray out / disable redeem button if not enough coins
+    if (coins < reward.cost) {
+      redeemBtn.disabled = true;   
+    }
+
+    // redeem reward click handler
     redeemBtn.addEventListener("click", () => {
-      if (coins >= reward.cost) {
-        coins -= reward.cost;          // subtract cost
-        alert(`You redeemed: ${reward.name}!`); // confirmation (MVP style)
-        saveData();                    // update storage and refresh UI
-      } else {
-        alert("Not enough coins!");
-      }
+      coins -= reward.cost;                  // subtract cost
+      alert(`You redeemed: ${reward.name}!`); // confirm redemption
+      saveData();                            // update storage and refresh UI
     });
 
     li.appendChild(redeemBtn);
     rewardList.appendChild(li);
   });
 }
+
 
 
 // save rewards and coins to chrome storage and re-render
