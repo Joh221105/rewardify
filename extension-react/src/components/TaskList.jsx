@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function TaskList() {
+function TaskList({setView}) {
   // initialization of variables
   const [coins, setCoins] = useState(0);
   const [tasks, setTasks] = useState([]); // holds task objects {text: string, done: boolean, value: int}
@@ -96,7 +96,7 @@ function TaskList() {
   }
 
   function openRewards() {
-    window.location.href = "rewards.html";
+    setView("rewards");
   }
 
   // Load data from storage upoon initialization
