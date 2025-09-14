@@ -25,8 +25,13 @@ function renderTasks() {
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "Delete";
         deleteBtn.addEventListener("click", () => {
-          tasks.splice(index, 1);
-          saveData();
+          const confirmed = confirm(
+            `Are you sure you want to delete "${task.text}"?`
+          );
+          if (confirmed) {
+            tasks.splice(index, 1);
+            saveData();
+          }
         });
 
         li.appendChild(input);
