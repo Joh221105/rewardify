@@ -106,12 +106,20 @@ document.getElementById("open-rewards").addEventListener("click", () => {
 // toggle edit mode
 document.getElementById("toggle-edit").addEventListener("click", () => {
   if (editMode) {
+    // Save task text edits
     const taskInputs = document.querySelectorAll(
       "input[type='text'][data-index]"
     );
     taskInputs.forEach((input) => {
       const i = input.dataset.index;
       tasks[i].text = input.value.trim() || tasks[i].text;
+    });
+
+    // Save task value edits
+    const valueSelects = document.querySelectorAll("select[data-index]");
+    valueSelects.forEach((select) => {
+      const i = select.dataset.index;
+      tasks[i].value = parseInt(select.value) || tasks[i].value;
     });
 
     saveData();
