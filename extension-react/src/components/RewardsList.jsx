@@ -6,6 +6,7 @@ function RewardsList({ setView, coins, setCoins }) {
   const [editMode, setEditMode] = useState(false);
   const [rewardName, setRewardName] = useState("");
   const [rewardCost, setRewardCost] = useState("");
+  const [error, setError] = useState(""); // holds error messages
 
   // render rewards in the list
   function renderRewards() {
@@ -50,8 +51,8 @@ function RewardsList({ setView, coins, setCoins }) {
               <input
                 type="number"
                 value={reward.cost}
-                min ="1"
-                max ="999"
+                min="1"
+                max="999"
                 onChange={(e) =>
                   updateReward(index, "cost", parseInt(e.target.value))
                 }
@@ -98,10 +99,11 @@ function RewardsList({ setView, coins, setCoins }) {
 
     if (field === "cost") {
       if (value < 1 || value > 999) {
-        alert("Reward cost must be between 1 and 999.");
+        setError("Reward cost must be between 1 and 999.");
         return;
       }
       updatedRewards[index][field] = value;
+      setError(""); 
     } else {
       updatedRewards[index][field] = value;
     }
@@ -114,7 +116,7 @@ function RewardsList({ setView, coins, setCoins }) {
     if (rewardName.trim()) {
       const cost = parseInt(rewardCost) || 0;
       if (cost < 1 || cost > 999) {
-        alert("Cost must be between 1 and 999.");
+        setError("Reward cost must be between 1 and 999.");
         return;
       }
 
@@ -122,6 +124,7 @@ function RewardsList({ setView, coins, setCoins }) {
       setRewards(newRewards);
       setRewardName(""); // clear inputs
       setRewardCost("");
+      setError(""); 
       saveData(newRewards, coins);
     }
   }
@@ -181,6 +184,9 @@ function RewardsList({ setView, coins, setCoins }) {
           Add
         </button>
       </div>
+
+      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
       <div className="flex gap-2">
         <button
           id="back-to-popup"
