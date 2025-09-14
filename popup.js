@@ -9,10 +9,14 @@ const taskList = document.getElementById("task-list");
 // render tasks in the list
 function renderTasks() {
   taskList.innerHTML = "";  // clear task display
-  tasks.forEach((task, index) => { //loops over each of the tasks in taskList and create a li element , and set its text and a linethrough if it is completed
+  tasks
+  .filter(task => !task.done)  // filter out completed tasks
+  .forEach((task, index) => { //loops over each of the tasks in taskList and create a li element , and set its text and a linethrough if it is completed
     const li = document.createElement("li");
     li.textContent = task.text;
-    if (task.done) li.style.textDecoration = "line-through";
+    if (task.done) {
+        tasks.splice(index, 1); // remove the completed task from the array
+    }
 
     li.addEventListener("click", () => completeTask(index));    // hook each of the task with a click event to fire the completeTask function
     taskList.appendChild(li);  //append the li element to the <ul id = "task-list">
@@ -24,11 +28,12 @@ function completeTask(index) {
   if (!tasks[index].done) { 
     tasks[index].done = true;
     coins++;
+    tasks = tasks.filter(task => !task.done); // remove completed tasks from the array
     saveData();
   }
 }
 
-// save tasks and coins to chrome storage
+// save tasks and coins to chrome storage and re-render
 function saveData() {
   chrome.storage.sync.set({ tasks, coins }, () => render());
 }
@@ -48,6 +53,11 @@ document.getElementById("add-task").addEventListener("click", () => {
     saveData();
   }
 });
+
+document.getElementById("open-rewards").addEventListener("click", () => {
+  window.location.href = "rewards.html";
+});
+
 
 // Load data from storage upoon initialization
 chrome.storage.sync.get(["tasks", "coins"], (data) => {
