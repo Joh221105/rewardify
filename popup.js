@@ -54,6 +54,11 @@ document.getElementById("add-task").addEventListener("click", () => {
   }
 });
 
+document.getElementById("open-rewards").addEventListener("click", () => {
+  window.location.href = "rewards.html";
+});
+
+
 // Load data from storage upoon initialization
 chrome.storage.sync.get(["tasks", "coins"], (data) => {
   tasks = data.tasks || [];
