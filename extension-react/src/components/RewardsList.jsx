@@ -17,7 +17,7 @@ function RewardsList({ setView, coins, setCoins }) {
         >
           {!editMode && (
             <>
-            {reward.name} - {reward.cost} coins
+              {reward.name} - {reward.cost} coins
               <button
                 className="bg-green-500 text-white px-2 py-1 rounded 
              hover:bg-green-600 hover:cursor-pointer
@@ -50,6 +50,8 @@ function RewardsList({ setView, coins, setCoins }) {
               <input
                 type="number"
                 value={reward.cost}
+                min ="1"
+                max ="999"
                 onChange={(e) =>
                   updateReward(index, "cost", parseInt(e.target.value))
                 }
@@ -93,17 +95,30 @@ function RewardsList({ setView, coins, setCoins }) {
   // helper to update reward fields while in edit mode
   function updateReward(index, field, value) {
     const updatedRewards = [...rewards];
-    updatedRewards[index][field] = value;
+
+    if (field === "cost") {
+      if (value < 1 || value > 999) {
+        alert("Reward cost must be between 1 and 999.");
+        return;
+      }
+      updatedRewards[index][field] = value;
+    } else {
+      updatedRewards[index][field] = value;
+    }
+
     setRewards(updatedRewards);
   }
 
   // add new reward and save
   function addReward() {
     if (rewardName.trim()) {
-      const newRewards = [
-        ...rewards,
-        { name: rewardName, cost: parseInt(rewardCost) || 0 },
-      ];
+      const cost = parseInt(rewardCost) || 0;
+      if (cost < 1 || cost > 999) {
+        alert("Cost must be between 1 and 999.");
+        return;
+      }
+
+      const newRewards = [...rewards, { name: rewardName, cost }];
       setRewards(newRewards);
       setRewardName(""); // clear inputs
       setRewardCost("");
@@ -123,7 +138,7 @@ function RewardsList({ setView, coins, setCoins }) {
       saveData(rewards, coins);
     }
 
-    // flip mode and rerender
+    // flip mode
     setEditMode(!editMode);
   }
 
@@ -151,6 +166,8 @@ function RewardsList({ setView, coins, setCoins }) {
         <input
           type="number"
           id="reward-cost"
+          min="1"
+          max="999"
           placeholder="Cost"
           value={rewardCost}
           onChange={(e) => setRewardCost(e.target.value)}
