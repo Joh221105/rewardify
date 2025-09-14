@@ -26,9 +26,13 @@ function renderRewards() {
 
       // redeem reward click handler
       redeemBtn.addEventListener("click", () => {
-        coins -= reward.cost; // subtract cost
-        alert(`You redeemed: ${reward.name}!`); // confirm redemption
-        saveData(); // update storage and refresh UI
+        const confirmed = confirm(
+          `Redeem "${reward.name}" for ${reward.cost} coins?`
+        );
+        if (confirmed) {
+          coins -= reward.cost; // subtract cost
+          saveData(); // update storage and refresh UI
+        }
       });
 
       li.appendChild(redeemBtn);
@@ -48,8 +52,13 @@ function renderRewards() {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.addEventListener("click", () => {
-        rewards.splice(index, 1);
-        saveData();
+        const confirmed = confirm(
+          `Are you sure you want to delete "${reward.name}"?`
+        );
+        if (confirmed) {
+          rewards.splice(index, 1);
+          saveData();
+        }
       });
 
       li.appendChild(nameInput);
