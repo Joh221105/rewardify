@@ -8,15 +8,31 @@ const rewardList = document.getElementById("reward-list");
 // render rewards in the list
 function renderRewards() {
   rewardList.innerHTML = ""; // clear existing
+
   rewards.forEach((reward, index) => {
     const li = document.createElement("li");
-    li.textContent = `${reward.name} - ${reward.cost} coins`;
+    li.textContent = `${reward.name} - ${reward.cost} coins `;
 
-    // TODO : Add redeem functionality
+    // create redeem button
+    const redeemBtn = document.createElement("button");
+    redeemBtn.textContent = "Redeem";
 
+    // reedeem click handler
+    redeemBtn.addEventListener("click", () => {
+      if (coins >= reward.cost) {
+        coins -= reward.cost;          // subtract cost
+        alert(`You redeemed: ${reward.name}!`); // confirmation (MVP style)
+        saveData();                    // update storage and refresh UI
+      } else {
+        alert("Not enough coins!");
+      }
+    });
+
+    li.appendChild(redeemBtn);
     rewardList.appendChild(li);
   });
 }
+
 
 // save rewards and coins to chrome storage and re-render
 function saveData() {
