@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function RewardsList({setView, coins, setCoins}) {
+function RewardsList({ setView, coins, setCoins }) {
   // initialization of variables
   const [rewards, setRewards] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -11,22 +11,26 @@ function RewardsList({setView, coins, setCoins}) {
   function renderRewards() {
     return rewards.map((reward, index) => {
       return (
-        <li key={index}>
-          {reward.name} - {reward.cost} coins{" "}
-          {/* create redeem button */}
+        <li
+          key={index}
+          className="flex items-center justify-between bg-white p-2 mb-2 rounded shadow-sm"
+        >
           {!editMode && (
             <>
+            {reward.name} - {reward.cost} coins
               <button
-                disabled={coins < reward.cost} // gray out / disable redeem button if not enough coins
+                className="bg-green-500 text-white px-2 py-1 rounded 
+             hover:bg-green-600 hover:cursor-pointer
+             disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={coins < reward.cost}
                 onClick={() => {
-                  // redeem reward click handler
                   const confirmed = confirm(
                     `Redeem "${reward.name}" for ${reward.cost} coins?`
                   );
                   if (confirmed) {
-                    const newCoins = coins - reward.cost; // subtract cost
+                    const newCoins = coins - reward.cost;
                     setCoins(newCoins);
-                    saveData(rewards, newCoins); // update storage and refresh UI
+                    saveData(rewards, newCoins);
                   }
                 }}
               >
@@ -36,11 +40,12 @@ function RewardsList({setView, coins, setCoins}) {
           )}
           {/* Edit mode: edit and delete buttons */}
           {editMode && (
-            <>
+            <div className="flex gap-2 w-full">
               <input
                 type="text"
                 value={reward.name}
                 onChange={(e) => updateReward(index, "name", e.target.value)}
+                className="flex-1 border rounded px-2 py-1"
               />
               <input
                 type="number"
@@ -48,6 +53,7 @@ function RewardsList({setView, coins, setCoins}) {
                 onChange={(e) =>
                   updateReward(index, "cost", parseInt(e.target.value))
                 }
+                className="w-20 border rounded px-2 py-1"
               />
               <button
                 onClick={() => {
@@ -55,15 +61,18 @@ function RewardsList({setView, coins, setCoins}) {
                     `Are you sure you want to delete "${reward.name}"?`
                   );
                   if (confirmed) {
-                    const updatedRewards = rewards.filter((_, i) => i !== index);
+                    const updatedRewards = rewards.filter(
+                      (_, i) => i !== index
+                    );
                     setRewards(updatedRewards);
                     saveData(updatedRewards, coins);
                   }
                 }}
+                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
               >
                 Delete
               </button>
-            </>
+            </div>
           )}
         </li>
       );
@@ -127,32 +136,50 @@ function RewardsList({setView, coins, setCoins}) {
   }, []);
 
   return (
-    <div>
-      <h2>Coins: {coins}</h2>
-      <ul>{renderRewards()}</ul>
-      <input
-        type="text"
-        id="reward-name"
-        placeholder="Reward name"
-        value={rewardName}
-        onChange={(e) => setRewardName(e.target.value)}
-      />
-      <input
-        type="number"
-        id="reward-cost"
-        placeholder="Cost"
-        value={rewardCost}
-        onChange={(e) => setRewardCost(e.target.value)}
-      />
-      <button id="add-reward" onClick={addReward}>
-        Add Reward
-      </button>
-      <button id="back-to-popup" onClick={openTaskList}>
-        Back
-      </button>
-      <button id="toggle-edit" onClick={toggleEdit}>
-        {editMode ? "Done" : "Edit Mode"}
-      </button>
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
+      <ul className="mb-4">{renderRewards()}</ul>
+      <div className="flex gap-2 mb-4">
+        <input
+          type="text"
+          id="reward-name"
+          placeholder="Reward name"
+          value={rewardName}
+          onChange={(e) => setRewardName(e.target.value)}
+          className="flex-1 border rounded px-2 py-1"
+        />
+        <input
+          type="number"
+          id="reward-cost"
+          placeholder="Cost"
+          value={rewardCost}
+          onChange={(e) => setRewardCost(e.target.value)}
+          className="w-20 border rounded px-2 py-1"
+        />
+        <button
+          id="add-reward"
+          onClick={addReward}
+          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+        >
+          Add
+        </button>
+      </div>
+      <div className="flex gap-2">
+        <button
+          id="back-to-popup"
+          onClick={() => setView("tasks")}
+          className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
+        >
+          Back
+        </button>
+        <button
+          id="toggle-edit"
+          onClick={toggleEdit}
+          className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+        >
+          {editMode ? "Done" : "Edit Mode"}
+        </button>
+      </div>
     </div>
   );
 }
