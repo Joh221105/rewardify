@@ -1,21 +1,76 @@
 import { useState, useEffect, useRef } from "react";
 
 function PomodoroTimer({ setCoins, coins }) {
-  const [timeLeft, setTimeLeft] = useState(25 * 60);  // 25 minutes in seconds, first cycle
+  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds, first cycle
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState("Focus"); // Focus | Short Break | Long Break
   const [cycles, setCycles] = useState(0); // number of completed focus sessions
   const timerRef = useRef(null);
 
+  // Load timer state from storage on mount
+  useEffect(() => {
+    chrome.storage.local.get(
+      ["endTime", "paused", "pausedTime", "mode", "cycles"],
+      (data) => {
+        if (data.mode) setMode(data.mode);
+        if (data.cycles) setCycles(data.cycles);
+
+        if (data.paused) {
+          setIsRunning(false);
+          setTimeLeft(data.pausedTime || 25 * 60);
+        } else if (data.endTime) {
+          const diff = Math.max(
+            0,
+            Math.floor((data.endTime - Date.now()) / 1000)
+          );
+          setTimeLeft(diff);
+          if (diff > 0) setIsRunning(true);
+        }
+      }
+    );
+  }, []);
+
+  // update timeLeft every second if running
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      chrome.storage.local.get(["endTime"], (data) => {
+        if (data.endTime) {
+          const diff = Math.max(
+            0,
+            Math.floor((data.endTime - Date.now()) / 1000)
+          );
+          setTimeLeft(diff);
+
+          if (diff === 0) {
+            clearInterval(interval);
+            handleSessionComplete();
+          }
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning]);
   // format s into mm:ss
   function formatTime(seconds) {
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   }
 
-  function toggleTimer() {
-    setIsRunning(!isRunning);
+  function startTimer() {
+    const endTime = Date.now() + timeLeft * 1000;  // *1000 to convert to ms
+    chrome.storage.local.set({ endTime, paused: false });
+    setIsRunning(true);
+  }
+
+  function pauseTimer() {
+    chrome.storage.local.set({ paused: true, pausedTime: timeLeft });
+    setIsRunning(false);
   }
 
   function resetTimer(newMode = "Focus") {
@@ -25,16 +80,6 @@ function PomodoroTimer({ setCoins, coins }) {
     if (newMode === "Long Break") setTimeLeft(20 * 60);
     setMode(newMode);
   }
-
-  // timer effect
-  useEffect(() => {
-    if (isRunning && timeLeft > 0) {
-      timerRef.current = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    } else if (timeLeft === 0) {
-      handleSessionComplete();
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [isRunning, timeLeft]);
 
   // handle end of a session and next cycle
   function handleSessionComplete() {
@@ -61,7 +106,9 @@ function PomodoroTimer({ setCoins, coins }) {
       <h2 className="text-lg font-medium mb-2">{mode}</h2>
 
       {/* Timer */}
-      <p className="text-5xl font-mono font-bold mb-4">{formatTime(timeLeft)}</p>
+      <p className="text-5xl font-mono font-bold mb-4">
+        {formatTime(timeLeft)}
+      </p>
 
       {/* Progress dots */}
       <div className="flex gap-2 mb-6">
@@ -77,12 +124,12 @@ function PomodoroTimer({ setCoins, coins }) {
 
       {/* Controls */}
       <div className="flex gap-4">
-        <button
-          onClick={toggleTimer}
-          className="w-12 h-12 flex items-center justify-center bg-green-500 text-white rounded-full hover:bg-green-600"
-        >
-          {/* Play */}
-          {!isRunning && (
+        {!isRunning ? (
+          <button
+            onClick={startTimer}
+            className="w-12 h-12 flex items-center justify-center bg-green-500 text-white rounded-full hover:bg-green-600"
+          >
+            {/* Play */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-6 h-6"
@@ -91,10 +138,13 @@ function PomodoroTimer({ setCoins, coins }) {
             >
               <path d="M8 5v14l11-7z" />
             </svg>
-          )}
-
-          {/* Pause */}
-          {isRunning && (
+          </button>
+        ) : (
+          <button
+            onClick={pauseTimer}
+            className="w-12 h-12 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600"
+          >
+            {/* Pause */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-6 h-6"
@@ -103,8 +153,8 @@ function PomodoroTimer({ setCoins, coins }) {
             >
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
-          )}
-        </button>
+          </button>
+        )}
 
         <button
           onClick={() => resetTimer(mode)}
