@@ -68,9 +68,9 @@ function PomodoroTimer({ setCoins, coins }) {
     return `${m}:${s}`;
   }
 
-    // SVG circle component for progress ring
+  // SVG circle component for progress ring
   function ProgressCircle({ progress }) {
-    const radius = 100; 
+    const radius = 100;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - progress * circumference;
 
@@ -94,7 +94,11 @@ function PomodoroTimer({ setCoins, coins }) {
           cy="110"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 1s linear" }}
+          style={{
+            transition: "stroke-dashoffset 1s linear",
+            transform: "rotate(-90deg)",
+            transformOrigin: "50% 50%",
+          }}
         />
       </svg>
     );
