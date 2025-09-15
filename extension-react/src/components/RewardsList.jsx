@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ConfirmationPopUp from "./ConfirmationPopUp";
 
 function RewardsList({ setView, coins, setCoins }) {
   // initialization of variables
@@ -7,6 +8,11 @@ function RewardsList({ setView, coins, setCoins }) {
   const [rewardName, setRewardName] = useState("");
   const [rewardCost, setRewardCost] = useState("");
   const [error, setError] = useState(""); // holds error messages
+
+  // confirmation popup state
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null); // "redeem" or "delete"
+  const [selectedReward, setSelectedReward] = useState(null);
 
   // render rewards in the list
   function renderRewards() {
@@ -21,18 +27,12 @@ function RewardsList({ setView, coins, setCoins }) {
               {reward.name} - {reward.cost} coins
               <button
                 className="bg-green-500 text-white px-2 py-1 rounded 
-             hover:bg-green-600 hover:cursor-pointer
-             disabled:bg-gray-400 disabled:cursor-not-allowed"
+    hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={coins < reward.cost}
                 onClick={() => {
-                  const confirmed = confirm(
-                    `Redeem "${reward.name}" for ${reward.cost} coins?`
-                  );
-                  if (confirmed) {
-                    const newCoins = coins - reward.cost;
-                    setCoins(newCoins);
-                    saveData(rewards, newCoins);
-                  }
+                  setSelectedReward(reward);
+                  setConfirmAction("redeem");
+                  setShowConfirm(true);
                 }}
               >
                 Redeem
@@ -60,16 +60,9 @@ function RewardsList({ setView, coins, setCoins }) {
               />
               <button
                 onClick={() => {
-                  const confirmed = confirm(
-                    `Are you sure you want to delete "${reward.name}"?`
-                  );
-                  if (confirmed) {
-                    const updatedRewards = rewards.filter(
-                      (_, i) => i !== index
-                    );
-                    setRewards(updatedRewards);
-                    saveData(updatedRewards, coins);
-                  }
+                  setSelectedReward(reward);
+                  setConfirmAction("delete");
+                  setShowConfirm(true);
                 }}
                 className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
               >
@@ -103,7 +96,7 @@ function RewardsList({ setView, coins, setCoins }) {
         return;
       }
       updatedRewards[index][field] = value;
-      setError(""); 
+      setError("");
     } else {
       updatedRewards[index][field] = value;
     }
@@ -124,7 +117,7 @@ function RewardsList({ setView, coins, setCoins }) {
       setRewards(newRewards);
       setRewardName(""); // clear inputs
       setRewardCost("");
-      setError(""); 
+      setError("");
       saveData(newRewards, coins);
     }
   }
@@ -155,6 +148,41 @@ function RewardsList({ setView, coins, setCoins }) {
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
+
+      {showConfirm && selectedReward && (
+        <ConfirmationPopUp
+          message={
+            confirmAction === "redeem"
+              ? `Redeem "${selectedReward.name}" for ${selectedReward.cost} coins?`
+              : `Are you sure you want to delete "${selectedReward.name}"?`
+          }
+          confirmText={confirmAction === "redeem" ? "Redeem" : "Delete"}
+          cancelText="Cancel"
+          confirmColor={confirmAction === "redeem" ? "green" : "red"}
+          onConfirm={() => {
+            if (confirmAction === "redeem") {
+              const newCoins = coins - selectedReward.cost;
+              setCoins(newCoins);
+              saveData(rewards, newCoins);
+            } else if (confirmAction === "delete") {
+              const updatedRewards = rewards.filter(
+                (r) => r !== selectedReward
+              );
+              setRewards(updatedRewards);
+              saveData(updatedRewards, coins);
+            }
+            setShowConfirm(false);
+            setSelectedReward(null);
+            setConfirmAction(null);
+          }}
+          onCancel={() => {
+            setShowConfirm(false);
+            setSelectedReward(null);
+            setConfirmAction(null);
+          }}
+        />
+      )}
+
       <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
       <ul className="mb-4">{renderRewards()}</ul>
       <div className="flex gap-2 mb-4">

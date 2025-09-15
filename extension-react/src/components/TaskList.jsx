@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ConfirmationPopUp from "./ConfirmationPopUp";
 
 function TaskList({ setView, coins, setCoins }) {
   // initialization of variables
@@ -6,6 +7,10 @@ function TaskList({ setView, coins, setCoins }) {
   const [taskValue, setTaskValue] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [error, setError] = useState("");
+
+  // confirmation popup state
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   // render tasks in the list
   function renderTasks() {
@@ -42,7 +47,10 @@ function TaskList({ setView, coins, setCoins }) {
                   ))}
                 </select>
                 <button
-                  onClick={() => deleteTask(index)}
+                  onClick={() => {
+                    setTaskToDelete(task); // store the actual task object
+                    setShowConfirm(true); // open popup
+                  }}
                   className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                 >
                   Delete
@@ -127,6 +135,26 @@ function TaskList({ setView, coins, setCoins }) {
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
+      {showConfirm && taskToDelete && (
+        <ConfirmationPopUp
+          message={`Are you sure you want to delete "${taskToDelete.text}"?`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmColor="red"
+          onConfirm={() => {
+            const updatedTasks = tasks.filter((t) => t !== taskToDelete);
+            setTasks(updatedTasks);
+            saveData(updatedTasks, coins);
+            setShowConfirm(false);
+            setTaskToDelete(null); // clear state
+          }}
+          onCancel={() => {
+            setShowConfirm(false);
+            setTaskToDelete(null); // clear state
+          }}
+        />
+      )}
+
       <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
       <button
         onClick={() => setEditMode(!editMode)}
