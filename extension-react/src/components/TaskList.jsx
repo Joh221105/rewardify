@@ -12,6 +12,15 @@ function TaskList({ setView, coins, setCoins }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
+  const [animate, setAnimate] = useState(false);
+
+  // coin animation effect whenever coins changes
+  useEffect(() => {
+      setAnimate(true);
+      const timeout = setTimeout(() => setAnimate(false), 300);
+      return () => clearTimeout(timeout);
+  }, [coins]);
+
   // render tasks in the list
   function renderTasks() {
     return tasks
@@ -156,7 +165,11 @@ function TaskList({ setView, coins, setCoins }) {
       )}
 
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <img src="icons/coin.png" alt="coin" className="w-6 h-6 inline-block" />
+        <img
+          src="icons/coin.png"
+          alt="coin"
+          className={`w-6 h-6 ${animate ? "coin-pop" : ""}`}
+        />
         {coins}
       </h2>
 
