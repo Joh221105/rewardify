@@ -31,28 +31,33 @@ function PomodoroTimer({ setCoins, coins }) {
   }, []);
 
   // update timeLeft every second if running
-  useEffect(() => {
-    if (!isRunning) return;
+useEffect(() => {
+  if (!isRunning) return;
 
-    const interval = setInterval(() => {
-      chrome.storage.local.get(["endTime"], (data) => {
-        if (data.endTime) {
-          const diff = Math.max(
-            0,
-            Math.floor((data.endTime - Date.now()) / 1000)
-          );
-          setTimeLeft(diff);
+  function updateTime() {
+    chrome.storage.local.get(["endTime"], (data) => {
+      if (data.endTime) {
+        const diff = Math.max(
+          0,
+          Math.floor((data.endTime - Date.now()) / 1000)
+        );
+        setTimeLeft(diff);
 
-          if (diff === 0) {
-            clearInterval(interval);
-            handleSessionComplete();
-          }
+        if (diff === 0) {
+          handleSessionComplete();
         }
-      });
-    }, 1000);
+      }
+    });
+  }
 
-    return () => clearInterval(interval);
-  }, [isRunning]);
+  // ⬅️ run once immediately
+  updateTime();
+
+  // then keep running every second
+  const interval = setInterval(updateTime, 1000);
+  return () => clearInterval(interval);
+}, [isRunning]);
+
   // format s into mm:ss
   function formatTime(seconds) {
     const m = Math.floor(seconds / 60)
