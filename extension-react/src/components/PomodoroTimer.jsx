@@ -93,10 +93,10 @@ function PomodoroTimer({ setCoins, coins }) {
           cx="110"
           cy="110"
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          strokeDashoffset={circumference * (1 - progress)} // clockwise movement
           style={{
             transition: "stroke-dashoffset 1s linear",
-            transform: "rotate(-90deg)",
+            transform: "rotate(-90deg)", // 12 o' clock start
             transformOrigin: "50% 50%",
           }}
         />
