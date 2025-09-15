@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ConfirmationPopUp from "./ConfirmationPopUp";
 
 function RewardsList({ setView, coins, setCoins }) {
@@ -15,11 +15,20 @@ function RewardsList({ setView, coins, setCoins }) {
   const [selectedReward, setSelectedReward] = useState(null);
 
   const [animate, setAnimate] = useState(false);
+  const [coinChange, setCoinChange] = useState(null); // {i.e.  amount: +5/-3, id: unique }
+  const prevCoins = useRef(coins);
 
-    useEffect(() => {
+  useEffect(() => {
+    const diff = coins - prevCoins.current;
+    if (diff !== 0) {
+      // trigger coin pop
       setAnimate(true);
-      const timeout = setTimeout(() => setAnimate(false), 300);
-      return () => clearTimeout(timeout);
+      setTimeout(() => setAnimate(false), 300);
+
+      // trigger floating number
+      setCoinChange({ amount: diff, id: Date.now() });
+    }
+    prevCoins.current = coins;
   }, [coins]);
 
   // render rewards in the list
@@ -190,13 +199,25 @@ function RewardsList({ setView, coins, setCoins }) {
         />
       )}
 
-      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+      <h2 className="relative text-xl font-bold mb-4 flex items-center gap-2">
         <img
           src="icons/coin.png"
           alt="coin"
-          className={`w-6 h-6 ${animate ? "coin-pop" : ""}`}
+          className={`w-6 h-6 ${animate ? "coin-animate" : ""}`}
         />
         {coins}
+        {coinChange && (
+          <span
+            key={coinChange.id}
+            className={`coin-change ml-2 ${
+              coinChange.amount > 0 ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {coinChange.amount > 0
+              ? `+${coinChange.amount}`
+              : coinChange.amount}
+          </span>
+        )}
       </h2>
 
       <ul className="mb-4">{renderRewards()}</ul>
