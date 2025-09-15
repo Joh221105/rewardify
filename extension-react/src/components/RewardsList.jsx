@@ -148,7 +148,6 @@ function RewardsList({ setView, coins, setCoins }) {
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
-
       {showConfirm && selectedReward && (
         <ConfirmationPopUp
           message={
@@ -183,7 +182,11 @@ function RewardsList({ setView, coins, setCoins }) {
         />
       )}
 
-      <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <img src="icons/coin.png" alt="coin" className="w-6 h-6 inline-block" />
+        {coins}
+      </h2>
+
       <ul className="mb-4">{renderRewards()}</ul>
       <div className="flex gap-2 mb-4">
         <input

@@ -155,7 +155,11 @@ function TaskList({ setView, coins, setCoins }) {
         />
       )}
 
-      <h2 className="text-xl font-bold mb-4">Coins: {coins}</h2>
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <img src="icons/coin.png" alt="coin" className="w-6 h-6 inline-block" />
+        {coins}
+      </h2>
+
       <button
         onClick={() => setEditMode(!editMode)}
         className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
