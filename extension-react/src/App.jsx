@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import TaskList from "./components/TaskList";
 import RewardsList from "./components/RewardsList";
+import PomodoroTimer from "./components/PomodoroTimer";
 
 function App() {
   const [view, setView] = useState("tasks"); 
@@ -21,6 +22,7 @@ function App() {
     <div>
       {view === "tasks" && <TaskList setView={setView} coins={coins} setCoins={setCoins} />}
       {view === "rewards" && <RewardsList setView={setView} coins={coins} setCoins={setCoins} />}
+      {view === "pomodoro" && <PomodoroTimer setView={setView} coins={coins} setCoins={setCoins} />}
     </div>
   );
 }

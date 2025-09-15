@@ -241,6 +241,12 @@ function TaskList({ setView, coins, setCoins }) {
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
       <button
+        onClick={() => setView("pomodoro")}
+        className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
+      >
+        Pomodoro
+      </button>
+      <button
         id="open-rewards"
         onClick={() => setView("rewards")}
         className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600"
