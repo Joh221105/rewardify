@@ -68,6 +68,18 @@ function PomodoroTimer({ setCoins, coins }) {
     return `${m}:${s}`;
   }
 
+  function notifyUser(title, message) {
+    if (Notification.permission === "granted") {
+      new Notification(title, { body: message, icon: "icons/coin.png" });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          new Notification(title, { body: message, icon: "icons/coin.png" });
+        }
+      });
+    }
+  }
+
   // SVG circle component for progress ring
   function ProgressCircle({ progress }) {
     const radius = 100;
@@ -116,9 +128,10 @@ function PomodoroTimer({ setCoins, coins }) {
   }
 
   function resetTimer(newMode = "Focus") {
-    let newTime = 25 * 60;
-    if (newMode === "Short Break") newTime = 5 * 60;
-    if (newMode === "Long Break") newTime = 20 * 60;
+    //TEMP for testing
+    let newTime = 10; // 10s for Focus
+    if (newMode === "Short Break") newTime = 5; // 5s for Short Break
+    if (newMode === "Long Break") newTime = 8; // 8s for Long Break
 
     setIsRunning(false);
     setTimeLeft(newTime);
@@ -141,12 +154,18 @@ function PomodoroTimer({ setCoins, coins }) {
       const nextCycle = cycles + 1;
       setCycles(nextCycle);
 
+      notifyUser("Focus Complete 🎉", "Take a short break!");
+
       if (nextCycle % 4 === 0) {
         resetTimer("Long Break");
       } else {
         resetTimer("Short Break");
       }
+    } else if (mode === "Short Break") {
+      notifyUser("Break Over ⏰", "Time to focus again!");
+      resetTimer("Focus");
     } else {
+      notifyUser("Long Break Finished ✅", "Back to focus!");
       resetTimer("Focus");
     }
   }
@@ -159,7 +178,7 @@ function PomodoroTimer({ setCoins, coins }) {
       {/* Timer */}
       <div className="relative flex items-center justify-center mb-4 w-[220px] h-[220px] translate-y-2">
         <ProgressCircle progress={timeLeft / sessionDuration} />
-        <span className="absolute text-6xl font-mono font-bol -translate-y-2">
+        <span className="absolute text-6xl font-mono font-bold -translate-y-2">
           {formatTime(timeLeft)}
         </span>
       </div>
