@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import ConfirmationPopUp from "./ConfirmationPopUp";
 
 function RewardsList({ setView, coins, setCoins }) {
@@ -8,6 +8,7 @@ function RewardsList({ setView, coins, setCoins }) {
   const [rewardName, setRewardName] = useState("");
   const [rewardCost, setRewardCost] = useState("");
   const [error, setError] = useState(""); // holds error messages
+  const [showAddReward, setShowAddReward] = useState(false);
 
   // confirmation popup state
   const [showConfirm, setShowConfirm] = useState(false);
@@ -157,7 +158,7 @@ function RewardsList({ setView, coins, setCoins }) {
   }, []);
 
   return (
-    <div className="p-6 bg-[#f9f6ff] rounded-xl">
+    <div className="w-[420px] p-6 bg-[#f9f6ff] rounded-xl">
       {showConfirm && selectedReward && (
         <ConfirmationPopUp
           message={
@@ -197,20 +198,20 @@ function RewardsList({ setView, coins, setCoins }) {
         <button
           onClick={() => setView("tasks")}
           className="flex-1 py-2 rounded-lg font-medium transition
-            bg-gray-200 text-black hover:bg-gray-300"
+          bg-gray-200 text-black hover:bg-gray-300"
         >
           Tasks
         </button>
         <button
           disabled
           className="flex-1 py-2 rounded-lg font-medium
-            bg-purple-500 text-white"
+          bg-purple-500 text-white"
         >
           Rewards
         </button>
       </div>
 
-      {/* Coin Counter + Edit Mode */}
+      {/* Coin Counter + Controls */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <img
@@ -232,42 +233,64 @@ function RewardsList({ setView, coins, setCoins }) {
             </span>
           )}
         </div>
-        <button
-          onClick={toggleEdit}
-          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
-        >
-          {editMode ? "Done" : "Edit Mode"}
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={toggleEdit}
+            className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+          >
+            {editMode ? "Done" : "Edit Mode"}
+          </button>
+
+          {/* Toggle Add Reward */}
+          <button
+            onClick={() => {
+              const el1 = document.getElementById("reward-name");
+              const el2 = document.getElementById("reward-cost");
+              if (showAddReward) {
+                if (el1) el1.value = "";
+                if (el2) el2.value = "";
+                setError("");
+              }
+              setShowAddReward(!showAddReward);
+            }}
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
+          >
+            {showAddReward ? "Hide Input" : "Add Reward"}
+          </button>
+        </div>
       </div>
 
-      {/* Add Reward Row */}
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          id="reward-name"
-          placeholder="Reward name"
-          value={rewardName}
-          onChange={(e) => setRewardName(e.target.value)}
-          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-        />
-        <input
-          type="number"
-          id="reward-cost"
-          min="1"
-          max="999"
-          placeholder="Cost"
-          value={rewardCost}
-          onChange={(e) => setRewardCost(e.target.value)}
-          className="w-24 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-        />
-        <button
-          id="add-reward"
-          onClick={addReward}
-          className="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition"
-        >
-          Add
-        </button>
-      </div>
+      {/* Add Reward Row (toggleable) */}
+      {showAddReward && (
+        <div className="flex gap-2 mb-6">
+          <input
+            type="text"
+            id="reward-name"
+            placeholder="Reward name"
+            value={rewardName}
+            onChange={(e) => setRewardName(e.target.value)}
+            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          />
+          <input
+            type="number"
+            id="reward-cost"
+            min="1"
+            max="999"
+            placeholder="Cost"
+            value={rewardCost}
+            onChange={(e) => setRewardCost(e.target.value)}
+            className="w-24 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          />
+          <button
+            id="add-reward"
+            onClick={addReward}
+            className="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition"
+          >
+            Add
+          </button>
+        </div>
+      )}
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 

@@ -7,6 +7,7 @@ function TaskList({ setView, coins, setCoins }) {
   const [taskValue, setTaskValue] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [error, setError] = useState("");
+  const [showAddTask, setShowAddTask] = useState(false);
 
   // confirmation popup state
   const [showConfirm, setShowConfirm] = useState(false);
@@ -165,7 +166,7 @@ function TaskList({ setView, coins, setCoins }) {
   }, []);
 
   return (
-    <div className="p-6 bg-[#fefcfc] rounded-xl">
+    <div className="w-[420px] p-6 bg-[#fefcfc] rounded-xl">
       {showConfirm && taskToDelete && (
         <ConfirmationPopUp
           message={`Are you sure you want to delete "${taskToDelete.text}"?`}
@@ -202,7 +203,7 @@ function TaskList({ setView, coins, setCoins }) {
         </button>
       </div>
 
-      {/* Coin Counter + Edit Mode */}
+      {/* Coin Counter + Controls */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <img
@@ -224,42 +225,63 @@ function TaskList({ setView, coins, setCoins }) {
             </span>
           )}
         </div>
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-        >
-          {editMode ? "Done" : "Edit Mode"}
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            {editMode ? "Done" : "Edit Mode"}
+          </button>
+
+          {/* Toggle Add Task */}
+          <button
+            onClick={() => {
+              const next = !showAddTask;
+              setShowAddTask(next);
+              setError("");
+              if (!next) {
+                const el = document.getElementById("new-task");
+                if (el) el.value = "";
+              }
+            }}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+          >
+            {showAddTask ? "Done" : "Add Task"}
+          </button>
+        </div>
       </div>
 
-      {/* Add Task Row */}
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          id="new-task"
-          placeholder="New task"
-          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-        />
-        <select
-          value={taskValue}
-          onChange={(e) => setTaskValue(parseInt(e.target.value))}
-          className="border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-        >
-          {[1, 2, 3, 4, 5].map((val) => (
-            <option key={val} value={val}>
-              {val} coin{val > 1 ? "s" : ""}
-            </option>
-          ))}
-        </select>
+      {/* Add Task Row (toggleable) */}
+      {showAddTask && (
+        <div className="flex gap-2 mb-6">
+          <input
+            type="text"
+            id="new-task"
+            placeholder="New task"
+            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+          />
+          <select
+            value={taskValue}
+            onChange={(e) => setTaskValue(parseInt(e.target.value))}
+            className="border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+          >
+            {[1, 2, 3, 4, 5].map((val) => (
+              <option key={val} value={val}>
+                {val} coin{val > 1 ? "s" : ""}
+              </option>
+            ))}
+          </select>
 
-        <button
-          id="add-task"
-          onClick={addTask}
-          className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition"
-        >
-          Add
-        </button>
-      </div>
+          <button
+            id="add-task"
+            onClick={addTask}
+            className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition"
+          >
+            Add
+          </button>
+        </div>
+      )}
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
