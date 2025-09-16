@@ -90,8 +90,8 @@ function TaskList({ setView, coins, setCoins }) {
               >
                 <span className="font-medium">{task.text}</span>
                 <span className="flex items-center gap-1 text-yellow-600 font-semibold">
-                  <img src="icons/coin.png" alt="coin" className="w-5 h-5" />
-                  +{task.value || 1}
+                  <img src="icons/coin.png" alt="coin" className="w-5 h-5" />+
+                  {task.value || 1}
                 </span>
               </div>
             )}
@@ -189,14 +189,14 @@ function TaskList({ setView, coins, setCoins }) {
       {/* Tabs */}
       <div className="flex mb-6 gap-2">
         <button
-          className="flex-1 bg-gray-200 text-black font-medium py-2 rounded-lg"
           disabled
+          className="flex-1 bg-purple-500 text-white font-medium py-2 rounded-lg"
         >
           Tasks
         </button>
         <button
           onClick={() => setView("rewards")}
-          className="flex-1 bg-purple-500 text-white font-medium py-2 rounded-lg hover:bg-purple-600 transition"
+          className="flex-1 bg-gray-200 text-black font-medium py-2 rounded-lg hover:bg-gray-300 transition"
         >
           Rewards
         </button>

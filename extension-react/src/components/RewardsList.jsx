@@ -18,14 +18,12 @@ function RewardsList({ setView, coins, setCoins }) {
   const [coinChange, setCoinChange] = useState(null); // {i.e.  amount: +5/-3, id: unique }
   const prevCoins = useRef(coins);
 
+  // animate coins when they change
   useEffect(() => {
     const diff = coins - prevCoins.current;
     if (diff !== 0) {
-      // trigger coin pop
       setAnimate(true);
       setTimeout(() => setAnimate(false), 300);
-
-      // trigger floating number
       setCoinChange({ amount: diff, id: Date.now() });
     }
     prevCoins.current = coins;
@@ -37,33 +35,39 @@ function RewardsList({ setView, coins, setCoins }) {
       return (
         <li
           key={index}
-          className="flex items-center justify-between bg-white p-2 mb-2 rounded shadow-sm"
+          className="flex items-center justify-between bg-white p-4 mb-3 rounded-xl shadow hover:shadow-md transition"
         >
           {!editMode && (
-            <>
-              {reward.name} - {reward.cost} coins
-              <button
-                className="bg-green-500 text-white px-2 py-1 rounded 
-    hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                disabled={coins < reward.cost}
-                onClick={() => {
-                  setSelectedReward(reward);
-                  setConfirmAction("redeem");
-                  setShowConfirm(true);
-                }}
-              >
-                Redeem
-              </button>
-            </>
+            <div className="flex-1 flex justify-between items-center">
+              <span className="font-medium">{reward.name}</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 text-yellow-600 font-semibold">
+                  <img src="icons/coin.png" alt="coin" className="w-5 h-5" />
+                  {reward.cost}
+                </div>
+                <button
+                  className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                  disabled={coins < reward.cost}
+                  onClick={() => {
+                    setSelectedReward(reward);
+                    setConfirmAction("redeem");
+                    setShowConfirm(true);
+                  }}
+                >
+                  Redeem
+                </button>
+              </div>
+            </div>
           )}
+
           {/* Edit mode: edit and delete buttons */}
           {editMode && (
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-2 w-full items-center">
               <input
                 type="text"
                 value={reward.name}
                 onChange={(e) => updateReward(index, "name", e.target.value)}
-                className="flex-1 border rounded px-2 py-1"
+                className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <input
                 type="number"
@@ -73,7 +77,7 @@ function RewardsList({ setView, coins, setCoins }) {
                 onChange={(e) =>
                   updateReward(index, "cost", parseInt(e.target.value))
                 }
-                className="w-20 border rounded px-2 py-1"
+                className="w-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <button
                 onClick={() => {
@@ -81,7 +85,7 @@ function RewardsList({ setView, coins, setCoins }) {
                   setConfirmAction("delete");
                   setShowConfirm(true);
                 }}
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
               >
                 Delete
               </button>
@@ -106,7 +110,6 @@ function RewardsList({ setView, coins, setCoins }) {
   // helper to update reward fields while in edit mode
   function updateReward(index, field, value) {
     const updatedRewards = [...rewards];
-
     if (field === "cost") {
       if (value < 1 || value > 999) {
         setError("Reward cost must be between 1 and 999.");
@@ -117,7 +120,6 @@ function RewardsList({ setView, coins, setCoins }) {
     } else {
       updatedRewards[index][field] = value;
     }
-
     setRewards(updatedRewards);
   }
 
@@ -129,29 +131,20 @@ function RewardsList({ setView, coins, setCoins }) {
         setError("Reward cost must be between 1 and 999.");
         return;
       }
-
       const newRewards = [...rewards, { name: rewardName, cost }];
       setRewards(newRewards);
-      setRewardName(""); // clear inputs
+      setRewardName("");
       setRewardCost("");
       setError("");
       saveData(newRewards, coins);
     }
   }
 
-  // back to main popup
-  function openTaskList() {
-    setView("tasks");
-  }
-
   // toggle edit mode
   function toggleEdit() {
     if (editMode) {
-      // exit edit mode and save all changes
-      saveData(rewards, coins);
+      saveData(rewards, coins); // save when leaving edit mode
     }
-
-    // flip mode
     setEditMode(!editMode);
   }
 
@@ -164,7 +157,7 @@ function RewardsList({ setView, coins, setCoins }) {
   }, []);
 
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
+    <div className="p-6 bg-[#f9f6ff] rounded-xl">
       {showConfirm && selectedReward && (
         <ConfirmationPopUp
           message={
@@ -199,36 +192,63 @@ function RewardsList({ setView, coins, setCoins }) {
         />
       )}
 
-      <h2 className="relative text-xl font-bold mb-4 flex items-center gap-2">
-        <img
-          src="icons/coin.png"
-          alt="coin"
-          className={`w-6 h-6 ${animate ? "coin-animate" : ""}`}
-        />
-        {coins}
-        {coinChange && (
-          <span
-            key={coinChange.id}
-            className={`coin-change ml-2 ${
-              coinChange.amount > 0 ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {coinChange.amount > 0
-              ? `+${coinChange.amount}`
-              : coinChange.amount}
-          </span>
-        )}
-      </h2>
+      {/* Tabs */}
+      <div className="flex mb-6 gap-2">
+        <button
+          onClick={() => setView("tasks")}
+          className="flex-1 py-2 rounded-lg font-medium transition
+            bg-gray-200 text-black hover:bg-gray-300"
+        >
+          Tasks
+        </button>
+        <button
+          disabled
+          className="flex-1 py-2 rounded-lg font-medium
+            bg-purple-500 text-white"
+        >
+          Rewards
+        </button>
+      </div>
 
-      <ul className="mb-4">{renderRewards()}</ul>
-      <div className="flex gap-2 mb-4">
+      {/* Coin Counter + Edit Mode */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <img
+            src="icons/coin.png"
+            alt="coin"
+            className={`w-8 h-8 ${animate ? "coin-animate" : ""}`}
+          />
+          <h2 className="text-2xl font-bold">{coins}</h2>
+          {coinChange && (
+            <span
+              key={coinChange.id}
+              className={`coin-change ml-2 text-lg font-semibold ${
+                coinChange.amount > 0 ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {coinChange.amount > 0
+                ? `+${coinChange.amount}`
+                : coinChange.amount}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={toggleEdit}
+          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+        >
+          {editMode ? "Done" : "Edit Mode"}
+        </button>
+      </div>
+
+      {/* Add Reward Row */}
+      <div className="flex gap-2 mb-6">
         <input
           type="text"
           id="reward-name"
           placeholder="Reward name"
           value={rewardName}
           onChange={(e) => setRewardName(e.target.value)}
-          className="flex-1 border rounded px-2 py-1"
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
         />
         <input
           type="number"
@@ -238,35 +258,21 @@ function RewardsList({ setView, coins, setCoins }) {
           placeholder="Cost"
           value={rewardCost}
           onChange={(e) => setRewardCost(e.target.value)}
-          className="w-20 border rounded px-2 py-1"
+          className="w-24 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
         />
         <button
           id="add-reward"
           onClick={addReward}
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          className="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition"
         >
           Add
         </button>
       </div>
 
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-      <div className="flex gap-2">
-        <button
-          id="back-to-popup"
-          onClick={() => setView("tasks")}
-          className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
-        >
-          Back
-        </button>
-        <button
-          id="toggle-edit"
-          onClick={toggleEdit}
-          className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-        >
-          {editMode ? "Done" : "Edit Mode"}
-        </button>
-      </div>
+      {/* Rewards List */}
+      <ul className="mb-6">{renderRewards()}</ul>
     </div>
   );
 }
