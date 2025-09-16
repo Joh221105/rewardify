@@ -203,6 +203,13 @@ function ShopPage({ setView, coins, setCoins }) {
           Tasks
         </button>
         <button
+          onClick={() => setView("rewards")}
+          className="flex-1 py-2 rounded-lg font-medium transition
+            bg-gray-200 text-black hover:bg-gray-300"
+        >
+          Rewards
+        </button>
+        <button
           disabled
           className="flex-1 py-2 rounded-lg font-medium
             bg-purple-500 text-white"
@@ -210,6 +217,11 @@ function ShopPage({ setView, coins, setCoins }) {
           Shop
         </button>
       </div>
+
+      {/* Shop heading */}
+      <h1 className="text-3xl font-bold mb-6 bg-purple-100 text-purple-700 px-4 py-2 rounded-lg shadow-sm">
+        Shop
+      </h1>
 
       {/* Coin Counter + Controls */}
       <div className="flex items-center justify-between mb-6">
