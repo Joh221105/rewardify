@@ -8,7 +8,12 @@ function PomodoroTimer({ setCoins, coins }) {
   const [cycles, setCycles] = useState(0); // number of completed focus sessions
   const timerRef = useRef(null);
 
-  // Load timer state from storage on mount
+  // states for custom durations (minutes)
+  const [focusDuration, setFocusDuration] = useState(25);
+  const [shortBreakDuration, setShortBreakDuration] = useState(5);
+  const [longBreakDuration, setLongBreakDuration] = useState(20);
+
+  // load timer state from storage on mount
   useEffect(() => {
     chrome.storage.local.get(
       ["endTime", "paused", "pausedTime", "mode", "cycles"],
@@ -18,7 +23,7 @@ function PomodoroTimer({ setCoins, coins }) {
 
         if (data.paused) {
           setIsRunning(false);
-          setTimeLeft(data.pausedTime || 25 * 60);
+          setTimeLeft(data.pausedTime || focusDuration * 60);
         } else if (data.endTime) {
           const diff = Math.max(
             0,
@@ -66,18 +71,6 @@ function PomodoroTimer({ setCoins, coins }) {
       .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
-  }
-
-  function notifyUser(title, message) {
-    if (Notification.permission === "granted") {
-      new Notification(title, { body: message, icon: "icons/coin.png" });
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          new Notification(title, { body: message, icon: "icons/coin.png" });
-        }
-      });
-    }
   }
 
   // SVG circle component for progress ring
@@ -128,10 +121,10 @@ function PomodoroTimer({ setCoins, coins }) {
   }
 
   function resetTimer(newMode = "Focus") {
-    //TEMP for testing
-    let newTime = 10; // 10s for Focus
-    if (newMode === "Short Break") newTime = 5; // 5s for Short Break
-    if (newMode === "Long Break") newTime = 8; // 8s for Long Break
+    // use custom durations
+    let newTime = focusDuration * 60;
+    if (newMode === "Short Break") newTime = shortBreakDuration * 60;
+    if (newMode === "Long Break") newTime = longBreakDuration * 60;
 
     setIsRunning(false);
     setTimeLeft(newTime);
@@ -154,24 +147,18 @@ function PomodoroTimer({ setCoins, coins }) {
       const nextCycle = cycles + 1;
       setCycles(nextCycle);
 
-      notifyUser("Focus Complete 🎉", "Take a short break!");
-
       if (nextCycle % 4 === 0) {
         resetTimer("Long Break");
       } else {
         resetTimer("Short Break");
       }
-    } else if (mode === "Short Break") {
-      notifyUser("Break Over ⏰", "Time to focus again!");
-      resetTimer("Focus");
     } else {
-      notifyUser("Long Break Finished ✅", "Back to focus!");
       resetTimer("Focus");
     }
   }
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md flex flex-col items-center w-72">
+    <div className="p-6 bg-white rounded-xl shadow-md flex flex-col items-center w-80">
       {/* Mode label */}
       <h2 className="text-2xl font-medium mb-2">{mode}</h2>
 
@@ -196,7 +183,7 @@ function PomodoroTimer({ setCoins, coins }) {
       </div>
 
       {/* Controls */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 mb-6">
         {!isRunning ? (
           <button
             onClick={startTimer}
@@ -243,6 +230,43 @@ function PomodoroTimer({ setCoins, coins }) {
             <path d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6a6 6 0 11-12 0H9a4 4 0 108 0c0-2.2-1.8-4-4-4z" />
           </svg>
         </button>
+      </div>
+
+      {/* Custom duration inputs */}
+      {/* Custom duration inputs */}
+      <div className="flex flex-col gap-2 w-full">
+        <label className="flex justify-between">
+          Focus (min):
+          <input
+            type="number"
+            value={focusDuration}
+            onChange={(e) => setFocusDuration(e.target.value)} // keep as string
+            onBlur={() => setFocusDuration(Number(focusDuration) || 1)} // sanitize when leaving input
+            className="border rounded px-2 py-1 w-20"
+          />
+        </label>
+        <label className="flex justify-between">
+          Short Break (min):
+          <input
+            type="number"
+            value={shortBreakDuration}
+            onChange={(e) => setShortBreakDuration(e.target.value)}
+            onBlur={() =>
+              setShortBreakDuration(Number(shortBreakDuration) || 1)
+            }
+            className="border rounded px-2 py-1 w-20"
+          />
+        </label>
+        <label className="flex justify-between">
+          Long Break (min):
+          <input
+            type="number"
+            value={longBreakDuration}
+            onChange={(e) => setLongBreakDuration(e.target.value)}
+            onBlur={() => setLongBreakDuration(Number(longBreakDuration) || 1)}
+            className="border rounded px-2 py-1 w-20"
+          />
+        </label>
       </div>
     </div>
   );
