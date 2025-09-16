@@ -8,22 +8,27 @@ function PomodoroTimer({ setCoins, coins }) {
   const [cycles, setCycles] = useState(0); // number of completed focus sessions
   const timerRef = useRef(null);
 
-  // states for custom durations (minutes)
+  // new states for custom durations (minutes)
   const [focusDuration, setFocusDuration] = useState(25);
   const [shortBreakDuration, setShortBreakDuration] = useState(5);
   const [longBreakDuration, setLongBreakDuration] = useState(20);
 
-  // load timer state from storage on mount
+  // load timer state and saved durations from storage on mount
   useEffect(() => {
     chrome.storage.local.get(
-      ["endTime", "paused", "pausedTime", "mode", "cycles"],
+      ["endTime", "paused", "pausedTime", "mode", "cycles", "focusDuration", "shortBreakDuration", "longBreakDuration"],
       (data) => {
         if (data.mode) setMode(data.mode);
         if (data.cycles) setCycles(data.cycles);
 
+        // load saved durations if present
+        if (data.focusDuration) setFocusDuration(data.focusDuration);
+        if (data.shortBreakDuration) setShortBreakDuration(data.shortBreakDuration);
+        if (data.longBreakDuration) setLongBreakDuration(data.longBreakDuration);
+
         if (data.paused) {
           setIsRunning(false);
-          setTimeLeft(data.pausedTime || focusDuration * 60);
+          setTimeLeft(data.pausedTime || (data.focusDuration || 25) * 60);
         } else if (data.endTime) {
           const diff = Math.max(
             0,
@@ -121,20 +126,22 @@ function PomodoroTimer({ setCoins, coins }) {
   }
 
   function resetTimer(newMode = "Focus") {
-    // use custom durations
-    let newTime = focusDuration * 60;
-    if (newMode === "Short Break") newTime = shortBreakDuration * 60;
-    if (newMode === "Long Break") newTime = longBreakDuration * 60;
+    // always pull the latest values from storage
+    chrome.storage.local.get(["focusDuration", "shortBreakDuration", "longBreakDuration"], (data) => {
+      let newTime = (data.focusDuration || focusDuration) * 60;
+      if (newMode === "Short Break") newTime = (data.shortBreakDuration || shortBreakDuration) * 60;
+      if (newMode === "Long Break") newTime = (data.longBreakDuration || longBreakDuration) * 60;
 
-    setIsRunning(false);
-    setTimeLeft(newTime);
-    setSessionDuration(newTime);
-    setMode(newMode);
+      setIsRunning(false);
+      setTimeLeft(newTime);
+      setSessionDuration(newTime);
+      setMode(newMode);
 
-    chrome.storage.local.set({
-      paused: true,
-      pausedTime: newTime,
-      mode: newMode,
+      chrome.storage.local.set({
+        paused: true,
+        pausedTime: newTime,
+        mode: newMode,
+      });
     });
   }
 
@@ -190,12 +197,7 @@ function PomodoroTimer({ setCoins, coins }) {
             className="w-12 h-12 flex items-center justify-center bg-green-500 text-white rounded-full hover:bg-green-600"
           >
             {/* Play */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>
@@ -205,12 +207,7 @@ function PomodoroTimer({ setCoins, coins }) {
             className="w-12 h-12 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600"
           >
             {/* Pause */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           </button>
@@ -221,18 +218,12 @@ function PomodoroTimer({ setCoins, coins }) {
           className="w-12 h-12 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600"
         >
           {/* Reset */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6a6 6 0 11-12 0H9a4 4 0 108 0c0-2.2-1.8-4-4-4z" />
           </svg>
         </button>
       </div>
 
-      {/* Custom duration inputs */}
       {/* Custom duration inputs */}
       <div className="flex flex-col gap-2 w-full">
         <label className="flex justify-between">
@@ -240,8 +231,12 @@ function PomodoroTimer({ setCoins, coins }) {
           <input
             type="number"
             value={focusDuration}
-            onChange={(e) => setFocusDuration(e.target.value)} // keep as string
-            onBlur={() => setFocusDuration(Number(focusDuration) || 1)} // sanitize when leaving input
+            onChange={(e) => setFocusDuration(e.target.value)}
+            onBlur={() => {
+              const val = Number(focusDuration) || 1;
+              setFocusDuration(val);
+              chrome.storage.local.set({ focusDuration: val });
+            }}
             className="border rounded px-2 py-1 w-20"
           />
         </label>
@@ -251,9 +246,11 @@ function PomodoroTimer({ setCoins, coins }) {
             type="number"
             value={shortBreakDuration}
             onChange={(e) => setShortBreakDuration(e.target.value)}
-            onBlur={() =>
-              setShortBreakDuration(Number(shortBreakDuration) || 1)
-            }
+            onBlur={() => {
+              const val = Number(shortBreakDuration) || 1;
+              setShortBreakDuration(val);
+              chrome.storage.local.set({ shortBreakDuration: val });
+            }}
             className="border rounded px-2 py-1 w-20"
           />
         </label>
@@ -263,7 +260,11 @@ function PomodoroTimer({ setCoins, coins }) {
             type="number"
             value={longBreakDuration}
             onChange={(e) => setLongBreakDuration(e.target.value)}
-            onBlur={() => setLongBreakDuration(Number(longBreakDuration) || 1)}
+            onBlur={() => {
+              const val = Number(longBreakDuration) || 1;
+              setLongBreakDuration(val);
+              chrome.storage.local.set({ longBreakDuration: val });
+            }}
             className="border rounded px-2 py-1 w-20"
           />
         </label>
