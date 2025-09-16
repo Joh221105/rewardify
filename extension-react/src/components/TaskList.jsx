@@ -7,6 +7,7 @@ function TaskList({ setView, coins, setCoins }) {
   const [taskValue, setTaskValue] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [error, setError] = useState("");
+  const [showAddTask, setShowAddTask] = useState(false);
 
   // confirmation popup state
   const [showConfirm, setShowConfirm] = useState(false);
@@ -50,22 +51,22 @@ function TaskList({ setView, coins, setCoins }) {
         ) => (
           <li
             key={index}
-            className="flex items-center justify-between bg-white p-2 mb-2 rounded shadow-sm"
+            className="flex items-center justify-between bg-white p-4 mb-3 rounded-xl shadow hover:shadow-md transition"
           >
             {editMode ? (
-              <div className="flex gap-2 w-full">
+              <div className="flex gap-2 w-full items-center">
                 <input
                   type="text"
                   value={task.text}
                   onChange={(e) => updateTask(index, "text", e.target.value)}
-                  className="flex-1 border rounded px-2 py-1"
+                  className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 <select
                   value={task.value || 1}
                   onChange={(e) =>
                     updateTask(index, "value", parseInt(e.target.value))
                   }
-                  className="border rounded px-2 py-1"
+                  className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   {[1, 2, 3, 4, 5].map((val) => (
                     <option key={val} value={val}>
@@ -78,18 +79,22 @@ function TaskList({ setView, coins, setCoins }) {
                     setTaskToDelete(task); // store the actual task object
                     setShowConfirm(true); // open popup
                   }}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
                 >
                   Delete
                 </button>
               </div>
             ) : (
-              <span
+              <div
                 onClick={() => completeTask(index)}
-                className="cursor-pointer flex-1 hover:bg-green-500 hover:text-white p-2 rounded"
+                className="cursor-pointer flex-1 flex justify-between items-center px-2"
               >
-                {task.text} (+{task.value || 1})
-              </span>
+                <span className="font-medium">{task.text}</span>
+                <span className="flex items-center gap-1 text-yellow-600 font-semibold">
+                  <img src="icons/coin.png" alt="coin" className="w-5 h-5" />+
+                  {task.value || 1}
+                </span>
+              </div>
             )}
           </li>
         )
@@ -161,7 +166,7 @@ function TaskList({ setView, coins, setCoins }) {
   }, []);
 
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
+    <div className="w-[420px] p-6 bg-[#fefcfc] rounded-xl">
       {showConfirm && taskToDelete && (
         <ConfirmationPopUp
           message={`Are you sure you want to delete "${taskToDelete.text}"?`}
@@ -182,77 +187,116 @@ function TaskList({ setView, coins, setCoins }) {
         />
       )}
 
-      <h2 className="relative text-xl font-bold mb-4 flex items-center gap-2">
-        <img
-          src="icons/coin.png"
-          alt="coin"
-          className={`w-6 h-6 ${animate ? "coin-animate" : ""}`}
-        />
-        {coins}
-        {coinChange && (
-          <span
-            key={coinChange.id}
-            className={`coin-change ml-2 ${
-              coinChange.amount > 0 ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {coinChange.amount > 0
-              ? `+${coinChange.amount}`
-              : coinChange.amount}
-          </span>
-        )}
-      </h2>
-
-      <button
-        onClick={() => setEditMode(!editMode)}
-        className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-      >
-        {editMode ? "Done" : "Edit Mode"}
-      </button>
-      <ul className="mb-4">{renderTasks()}</ul>
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          id="new-task"
-          placeholder="New task"
-          className="flex-1 border rounded px-2 py-1"
-        />
-        <select
-          value={taskValue}
-          onChange={(e) => setTaskValue(parseInt(e.target.value))}
-          className="border rounded px-2 py-1"
-        >
-          {[1, 2, 3, 4, 5].map((val) => (
-            <option key={val} value={val}>
-              {val} coin{val > 1 ? "s" : ""}
-            </option>
-          ))}
-        </select>
-
+      {/* Tabs */}
+      <div className="flex mb-6 gap-2">
         <button
-          id="add-task"
-          onClick={addTask}
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+          disabled
+          className="flex-1 bg-purple-500 text-white font-medium py-2 rounded-lg"
         >
-          Add
+          Tasks
+        </button>
+        <button
+          onClick={() => setView("rewards")}
+          className="flex-1 bg-gray-200 text-black font-medium py-2 rounded-lg hover:bg-gray-300 transition"
+        >
+          Rewards
         </button>
       </div>
 
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      {/* Coin Counter + Controls */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <img
+            src="icons/coin.png"
+            alt="coin"
+            className={`w-8 h-8 ${animate ? "coin-animate" : ""}`}
+          />
+          <h2 className="text-2xl font-bold">{coins}</h2>
+          {coinChange && (
+            <span
+              key={coinChange.id}
+              className={`coin-change ml-2 text-lg font-semibold ${
+                coinChange.amount > 0 ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {coinChange.amount > 0
+                ? `+${coinChange.amount}`
+                : coinChange.amount}
+            </span>
+          )}
+        </div>
 
-      <button
-        onClick={() => setView("pomodoro")}
-        className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
-      >
-        Pomodoro
-      </button>
-      <button
-        id="open-rewards"
-        onClick={() => setView("rewards")}
-        className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600"
-      >
-        Rewards
-      </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            {editMode ? "Done" : "Edit Mode"}
+          </button>
+
+          {/* Toggle Add Task */}
+          <button
+            onClick={() => {
+              const next = !showAddTask;
+              setShowAddTask(next);
+              setError("");
+              if (!next) {
+                const el = document.getElementById("new-task");
+                if (el) el.value = "";
+              }
+            }}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+          >
+            {showAddTask ? "Done" : "Add Task"}
+          </button>
+        </div>
+      </div>
+
+      {/* Add Task Row (toggleable) */}
+      {showAddTask && (
+        <div className="flex gap-2 mb-6">
+          <input
+            type="text"
+            id="new-task"
+            placeholder="New task"
+            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+          />
+          <select
+            value={taskValue}
+            onChange={(e) => setTaskValue(parseInt(e.target.value))}
+            className="border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+          >
+            {[1, 2, 3, 4, 5].map((val) => (
+              <option key={val} value={val}>
+                {val} coin{val > 1 ? "s" : ""}
+              </option>
+            ))}
+          </select>
+
+          <button
+            id="add-task"
+            onClick={addTask}
+            className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition"
+          >
+            Add
+          </button>
+        </div>
+      )}
+
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+      {/* Task List */}
+      <ul className="mb-6">{renderTasks()}</ul>
+
+      {/* Navigation */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setView("pomodoro")}
+          className="flex-1 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
+        >
+          Pomodoro
+        </button>
+      </div>
     </div>
   );
 }
